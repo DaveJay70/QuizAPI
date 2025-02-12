@@ -5,6 +5,7 @@
         public int ResultID { get; set; }
         public int? QuizID { get; set; }
         public decimal Score { get; set; }
-        public DateTime TimeTaken { get; set; }
+        public string? QuizName { get; set; }
+
     }
 }

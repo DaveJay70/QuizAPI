@@ -138,5 +138,110 @@ namespace QuizAPI.Data
             }
         }
         #endregion
+
+        #region QuizCount
+        public int GetTotalQuizzesCount()
+        {
+            int count = 0;
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    SqlCommand command = new SqlCommand("[dbo].[PR_Quizzes_Count]", connection)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
+                    connection.Open();
+                    count = (int)command.ExecuteScalar();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching total quizzes: {ex.Message}");
+            }
+            return count;
+        }
+
+        #endregion
+
+        #region GetLevel
+        public IEnumerable<LevelsModel> GetLevels()
+        {
+            var levels = new List<LevelsModel>();
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand("[dbo].[PR_Levels_SelectAll]", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    levels.Add(new LevelsModel
+                    {
+                        LevelID = Convert.ToInt32(reader["LevelID"]),
+                        LevelName = reader["LevelName"].ToString()
+                    });
+                }
+            }
+            return levels;
+        }
+        #endregion
+
+        #region GetUsers
+        public IEnumerable<UserDropDownModel> GetUsers()
+        {
+            var users = new List<UserDropDownModel>();
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand("[dbo].[PR_User_DropDown]", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    users.Add(new UserDropDownModel
+                    {
+                        UserID = Convert.ToInt32(reader["UserID"]),
+                        Username = reader["Username"].ToString()
+                    });
+                }
+            }
+            return users;
+        }
+        #endregion
+
+        #region GetSubtopics
+        public IEnumerable<SubTopicDropDownModel> GetSubtopics()
+        {
+            var subtopic = new List<SubTopicDropDownModel>();
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand("[dbo].[PR_Subtopics_DropDown]", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    subtopic.Add(new SubTopicDropDownModel
+                    {
+                        SubtopicID = Convert.ToInt32(reader["SubtopicID"]),
+                        SubtopicName = reader["SubtopicName"].ToString()
+                    });
+                }
+            }
+            return subtopic;
+        }
+        #endregion
+
+
     }
 }

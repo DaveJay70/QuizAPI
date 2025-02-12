@@ -63,16 +63,11 @@ namespace QuizAPI.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateLevel(int id, [FromBody] LevelsModel level)
         {
-            if (level == null || id != level.LevelID)
-            {
+            if (id != level.LevelID)
                 return BadRequest();
-            }
-            var isUpdated = _levelsRepository.UpdateLevel(level);
-            if (!isUpdated)
-            {
-                return NotFound();
-            }
-            return NoContent();
+            if (_levelsRepository.UpdateLevel(level))
+                return Ok(new { message = "Level updated successfully" });
+            return BadRequest(new { message = "Failed to update Level" });
         }
         #endregion
 

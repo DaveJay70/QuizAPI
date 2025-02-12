@@ -16,12 +16,8 @@ namespace QuizAPI.Models
             RuleFor(u => u.Password)
                 .NotEmpty()
                 .WithMessage("Password Compulsory");
-            RuleFor(u => u.Role)
-                .NotEmpty()
-                .WithMessage("Role Compulsory");
-            RuleFor(u => u.CreatedAt)
-                .NotEmpty()
-                .WithMessage("CreatedAt Compulsory");
+            
+            
         }
     }
 }

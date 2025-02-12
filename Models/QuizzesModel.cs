@@ -13,3 +13,11 @@
     public string? LevelName { get; set; }
     public string? SubtopicName { get; set; }
 }
+
+public class QuizDropDownModel
+{
+    public int QuizID { get; set; }
+    public string QuizName { get; set; }
+}
+
+

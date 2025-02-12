@@ -48,19 +48,22 @@ namespace QuizAPI.Controllers
         }
         #endregion
 
-        #region Update SubTopics
-
         [HttpPut("{id}")]
-        public IActionResult Update(int id ,[FromBody] SubTopicsModel subtopic)
+        public IActionResult Update(int id, [FromBody] SubTopicsModel subtopic)
         {
+            if (subtopic == null)
+                return BadRequest(new { Message = "Invalid request body" });
+
             if (id != subtopic.SubtopicID)
-                return BadRequest();
-            if (_repository.UpdateSubtopic(subtopic))
+                return BadRequest(new { Message = "ID mismatch" });
+
+            bool isUpdated = _repository.UpdateSubtopic(subtopic);
+
+            if (isUpdated)
                 return Ok(new { Message = "Subtopic updated successfully" });
+
             return BadRequest(new { Message = "Failed to update subtopic" });
         }
-        #endregion
-
         #region Delete SubTopics
 
         [HttpDelete("{id}")]
@@ -71,5 +74,32 @@ namespace QuizAPI.Controllers
             return BadRequest(new { Message = "Failed to delete subtopic" });
         }
         #endregion
+
+        #region GetSubtopics
+        [HttpGet("topic")]
+        public IActionResult GetTopics()
+        {
+            var topic = _repository.GetTopics();
+            if (!topic.Any())
+            {
+                return NotFound("No Topic Found");
+            }
+            return Ok(topic);
+        }
+        #endregion
+
+        [HttpPut("Toggle/{id}")]
+        public IActionResult ToggleIsActive(int id)
+        {
+            var subtopic = _repository.SelectByPK(id);
+            if (subtopic == null)
+                return NotFound();
+
+            bool newStatus = !subtopic.IsActive;
+            if (_repository.ToggleIsActive(id, newStatus))
+                return Ok(new { Message = "Subtopic status updated successfully" });
+
+            return BadRequest(new { Message = "Failed to update subtopic status" });
+        }
     }
 }

@@ -32,7 +32,9 @@ namespace QuizAPI.Data
                     {
                         QuestionID = Convert.ToInt32(reader["QuestionID"]),
                         SubtopicID = Convert.ToInt32(reader["SubtopicID"]),
+                        SubtopicName = reader["SubtopicName"].ToString(),
                         LevelID = Convert.ToInt32(reader["LevelID"]),
+                        LevelName = reader["LevelName"].ToString(),
                         QuestionText = reader["QuestionText"].ToString(),
                         QuestionType = reader["QuestionType"].ToString(),
                         Options1 = reader["Options1"].ToString(),
@@ -110,7 +112,6 @@ namespace QuizAPI.Data
                 command.Parameters.AddWithValue("@CorrectOption", question.CorrectOption);
                 command.Parameters.AddWithValue("@CorrectAnswer", question.CorrectAnswer);
                 command.Parameters.AddWithValue("@Mark", question.Mark);
-                command.Parameters.AddWithValue("@CreatedAt", question.CreatedAt);
                 connection.Open();
                 int rowsAffected = command.ExecuteNonQuery();
                 return rowsAffected > 0;
@@ -153,16 +154,119 @@ namespace QuizAPI.Data
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                SqlCommand command = new SqlCommand("[dbo].[PR_Questions_Delete]", connection)
+                connection.Open();
+                SqlTransaction transaction = connection.BeginTransaction();
+
+                try
+                {
+                    string deleteQuizQuestionsQuery = "DELETE FROM QuizQuestions WHERE QuestionID = @QuestionID";
+                    using (SqlCommand cmd = new SqlCommand(deleteQuizQuestionsQuery, connection, transaction))
+                    {
+                        cmd.Parameters.AddWithValue("@QuestionID", QuestionID);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    string deleteQuestionQuery = "DELETE FROM Questions WHERE QuestionID = @QuestionID";
+                    using (SqlCommand cmd = new SqlCommand(deleteQuestionQuery, connection, transaction))
+                    {
+                        cmd.Parameters.AddWithValue("@QuestionID", QuestionID);
+                        int rowsAffected = cmd.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            transaction.Commit();
+                            return true;
+                        }
+                    }
+
+                    transaction.Rollback();
+                    return false;
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;  
+                }
+            }
+        }
+
+        #endregion
+
+        #region GetLevel
+        public IEnumerable<LevelsModel> GetLevels()
+        {
+            var levels = new List<LevelsModel>();
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand("[dbo].[PR_Levels_SelectAll]", connection)
                 {
                     CommandType = CommandType.StoredProcedure
                 };
-                command.Parameters.AddWithValue("@QuestionID", QuestionID);
                 connection.Open();
-                int rowsAffected = command.ExecuteNonQuery();
-                return rowsAffected > 0;
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    levels.Add(new LevelsModel
+                    {
+                        LevelID = Convert.ToInt32(reader["LevelID"]),
+                        LevelName = reader["LevelName"].ToString()
+                    });
+                }
             }
+            return levels;
         }
         #endregion
+
+        #region GetSubtopics
+        public IEnumerable<SubTopicDropDownModel> GetSubtopics()
+        {
+            var subtopic = new List<SubTopicDropDownModel>();
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand("[dbo].[PR_Subtopics_DropDown]", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    subtopic.Add(new SubTopicDropDownModel
+                    {
+                        SubtopicID = Convert.ToInt32(reader["SubtopicID"]),
+                        SubtopicName = reader["SubtopicName"].ToString()
+                    });
+                }
+            }
+            return subtopic;
+        }
+        #endregion
+
+        #region QuestionCount
+        public int GetTotalQuestionsCount()
+        {
+            int count = 0;
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    SqlCommand command = new SqlCommand("[dbo].[PR_Questions_Count]", connection)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
+                    connection.Open();
+                    count = (int)command.ExecuteScalar();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching total quizzes: {ex.Message}");
+            }
+            return count;
+        }
+        #endregion
+
     }
 }

@@ -24,25 +24,54 @@ namespace QuizAPI.Controllers
         }
         #endregion
 
-        #region GetByID QuizQuestions
-
+        #region GetQuizQuestion
         [HttpGet("{id}")]
         public ActionResult<QuizQuestionsModel> GetQuizQuestion(int id)
         {
-            var quizQuestion = _quizQuestionsRepository.SelectByPK(id);
+            var quizQuestion = _quizQuestionsRepository.SelectByPK(id); // ✅ Fetch from repository
+
             if (quizQuestion == null)
-                return NotFound();
+            {
+                return NotFound(new { message = "Quiz question not found." });
+            }
+
             return Ok(quizQuestion);
         }
         #endregion
 
-        #region InsertQuizQuestions
+        #region Create Question
         [HttpPost]
         public ActionResult CreateQuizQuestion([FromBody] QuizQuestionsModel quizQuestion)
         {
-            if (_quizQuestionsRepository.InsertQuizQuestion(quizQuestion))
-                return CreatedAtAction(nameof(GetQuizQuestion), new { id = quizQuestion.QuizQuestionID }, quizQuestion);
-            return BadRequest();
+            try
+            {
+                // Validate input
+                if (quizQuestion.QuizID <= 0 || quizQuestion.QuestionID <= 0)
+                {
+                    return BadRequest(new { message = "Invalid QuizID or QuestionID." });
+                }
+
+                // Check if the question already exists for the selected quiz
+                var existingQuizQuestions = _quizQuestionsRepository.SelectByQuizId(quizQuestion.QuizID);
+                if (existingQuizQuestions.Any(q => q.QuestionID == quizQuestion.QuestionID))
+                {
+                    return BadRequest(new { message = "This question already exists in the selected quiz." });
+                }
+
+                // Insert into database
+                int insertedId = _quizQuestionsRepository.InsertQuizQuestion(quizQuestion);
+
+                if (insertedId > 0)
+                {
+                    return CreatedAtAction(nameof(GetQuizQuestion), new { id = insertedId }, quizQuestion);
+                }
+
+                return BadRequest("Insertion failed.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
         #endregion
 
@@ -69,5 +98,42 @@ namespace QuizAPI.Controllers
             return NotFound();
         }
         #endregion
+
+        #region GetQuiz
+        [HttpGet("quizzes")]
+        public IActionResult GetQuiz()
+        {
+            var quiz = _quizQuestionsRepository.GetQuiz();
+            if (!quiz.Any())
+            {
+                return NotFound("No Quiz Found");
+            }
+            return Ok(quiz);
+        }
+        #endregion
+
+        #region GetQuizQuestionsByQuizId
+
+        [HttpGet("quiz/{quizId}")]
+        public ActionResult<IEnumerable<QuizQuestionsModel>> GetQuizQuestionsByQuizId(int quizId)
+        {
+            var quizQuestions = _quizQuestionsRepository.SelectByQuizId(quizId);
+            if (quizQuestions == null || !quizQuestions.Any())
+                return NotFound("No questions found for this quiz.");
+
+            return Ok(quizQuestions);
+        }
+        #endregion
+
+        #region GetQuestionCountByQuizId
+
+        [HttpGet("count/{quizId}")]
+        public ActionResult<int> GetQuestionCountByQuizId(int quizId)
+        {
+            int count = _quizQuestionsRepository.GetQuestionCountByQuizId(quizId);
+            return Ok(count);
+        }
+        #endregion
+
     }
 }

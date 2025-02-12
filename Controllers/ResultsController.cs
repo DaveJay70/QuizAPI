@@ -25,6 +25,16 @@ namespace QuizAPI.Controllers
         }
         #endregion
 
+        #region GetALL_Count
+        [HttpGet("count")]
+        public IActionResult GetAllCount()
+        {
+            int result = _repository.GetTotalResultsCount();
+            return Ok(new { Result_Count = result });
+
+        }
+        #endregion
+
         #region GetByID Results
 
         [HttpGet("{id}")]
@@ -69,6 +79,19 @@ namespace QuizAPI.Controllers
             if (_repository.DeleteResult(id))
                 return Ok(new { Message = "Result deleted successfully" });
             return BadRequest(new { Message = "Failed to delete result" });
+        }
+        #endregion
+
+        #region GetQuiz
+        [HttpGet("quizzes")]
+        public IActionResult GetQuiz()
+        {
+            var quiz = _repository.GetQuiz();
+            if (!quiz.Any())
+            {
+                return NotFound("No Quiz Found");
+            }
+            return Ok(quiz);
         }
         #endregion
     }

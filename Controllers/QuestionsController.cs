@@ -1,6 +1,7 @@
 ﻿using QuizAPI.Data;
 using QuizAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 
 namespace QuizAPI.Controllers
 {
@@ -75,15 +76,68 @@ namespace QuizAPI.Controllers
         #region Delete Questions
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteQuestion(int id)
+        public ActionResult DeleteQuestion(int id)
         {
-            var isDeleted = _questionsRepository.Delete(id);
-            if (!isDeleted)
+            try
             {
-                return NotFound();
+                if (_questionsRepository.Delete(id))
+                    return NoContent();
+
+                return NotFound("Question not found.");
             }
-            return NoContent();
+            catch (SqlException ex) when (ex.Number == 547) 
+            {
+                return Conflict(new { Error = "Cannot delete question because it is used in quizzes.", Details = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = "An error occurred while deleting the question.", Details = ex.Message });
+            }
         }
+
+        #endregion
+
+        #region GetLevels
+        [HttpGet("levels")]
+        public IActionResult GetLevels()
+        {
+            var levels = _questionsRepository.GetLevels();
+            if (!levels.Any())
+            {
+                return NotFound("No Levels Found");
+            }
+            return Ok(levels);
+        }
+        #endregion
+
+        #region GetSubtopics
+        [HttpGet("subtopic")]
+        public IActionResult GetSubtopics()
+        {
+            var subtopic = _questionsRepository.GetSubtopics();
+            if (!subtopic.Any())
+            {
+                return NotFound("No Subtopic Found");
+            }
+            return Ok(subtopic);
+        }
+        #endregion
+
+        #region GetALL_Count
+        [HttpGet("count")]
+        public IActionResult GetAllCount()
+        {
+            try
+            {
+                int questions = _questionsRepository.GetTotalQuestionsCount();
+                return Ok(new { Questions_Count = questions });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = "Failed to fetch questions count", Details = ex.Message });
+            }
+        }
+
         #endregion
     }
 }

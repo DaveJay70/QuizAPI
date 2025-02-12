@@ -16,5 +16,8 @@
         public string CorrectAnswer { get; set; }
         public decimal Mark { get; set; }
         public DateTime CreatedAt { get; set; }
+
+        public string? LevelName { get; set; }
+        public string? SubtopicName { get; set; }
     }
 }
