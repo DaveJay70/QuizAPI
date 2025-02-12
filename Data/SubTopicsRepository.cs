@@ -18,27 +18,36 @@ namespace QuizAPI.Data
         public IEnumerable<SubTopicsModel> SelectAll()
         {
             var subtopics = new List<SubTopicsModel>();
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            try
             {
-                SqlCommand command = new SqlCommand("[dbo].[PR_Subtopics_SelectAll]", connection)
+                using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
-                    CommandType = CommandType.StoredProcedure
-                };
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    subtopics.Add(new SubTopicsModel
+                    SqlCommand command = new SqlCommand("[dbo].[PR_Subtopics_SelectAll]", connection)
                     {
-                        SubtopicID = Convert.ToInt32(reader["SubtopicID"]),
-                        TopicID = Convert.ToInt32(reader["TopicID"]),
-                        SubtopicName = reader["SubtopicName"].ToString(),
-                        IsActive = Convert.ToBoolean(reader["IsActive"])
-                    });
+                        CommandType = CommandType.StoredProcedure
+                    };
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        subtopics.Add(new SubTopicsModel
+                        {
+                            SubtopicID = Convert.ToInt32(reader["SubtopicID"]),
+                            TopicID = Convert.ToInt32(reader["TopicID"]),
+                            TopicName = reader["TopicName"].ToString(),
+                            SubtopicName = reader["SubtopicName"].ToString(),
+                            IsActive = Convert.ToBoolean(reader["IsActive"])
+                        });
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in SelectAll(): {ex.Message}");
             }
             return subtopics;
         }
+
         #endregion
 
         #region GetByID SubTopics
@@ -72,20 +81,29 @@ namespace QuizAPI.Data
         #region Insert SubTopics
         public bool InsertSubtopic(SubTopicsModel subtopic)
         {
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            try
             {
-                SqlCommand command = new SqlCommand("[dbo].[PR_Subtopics_Insert]", connection)
+                using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
-                    CommandType = CommandType.StoredProcedure
-                };
-                command.Parameters.AddWithValue("@TopicID", subtopic.TopicID);
-                command.Parameters.AddWithValue("@SubtopicName", subtopic.SubtopicName);
-                command.Parameters.AddWithValue("@IsActive", subtopic.IsActive);
-                connection.Open();
-                int rowsAffected = command.ExecuteNonQuery();
-                return rowsAffected > 0;
+                    SqlCommand command = new SqlCommand("[dbo].[PR_Subtopics_Insert]", connection)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
+                    command.Parameters.AddWithValue("@TopicID", subtopic.TopicID);
+                    command.Parameters.AddWithValue("@SubtopicName", subtopic.SubtopicName);
+                    command.Parameters.AddWithValue("@IsActive", subtopic.IsActive);
+                    connection.Open();
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in InsertSubtopic(): {ex.Message}");
+                return false;
             }
         }
+
         #endregion
 
         #region Update SubTopics
@@ -125,5 +143,86 @@ namespace QuizAPI.Data
             }
         }
         #endregion
+
+        #region GetTopics
+        public IEnumerable<TopicDropDownModel> GetTopics()
+        {
+            var subtopic = new List<TopicDropDownModel>();
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand("[dbo].[PR_Topic_DropDown]", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    subtopic.Add(new TopicDropDownModel
+                    {
+                        TopicID = Convert.ToInt32(reader["TopicID"]),
+                        TopicName = reader["TopicName"].ToString()
+                    });
+                }
+            }
+            return subtopic;
+        }
+        #endregion
+
+        public bool ToggleIsActive(int SubtopicID, bool isActive)
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand("[dbo].[PR_Subtopics_ToggleIsActive]", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                command.Parameters.AddWithValue("@SubtopicID", SubtopicID);
+                command.Parameters.AddWithValue("@IsActive", isActive);
+                connection.Open();
+                int rowsAffected = command.ExecuteNonQuery();
+                return rowsAffected > 0;
+            }
+        }
+
+
+        public IEnumerable<SubTopicsModel> SelectByTopicID(int topicID)
+        {
+            var subtopics = new List<SubTopicsModel>();
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    SqlCommand command = new SqlCommand("[dbo].[PR_Subtopics_SelectByTopicID]", connection)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
+                    command.Parameters.AddWithValue("@TopicID", topicID);
+
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        subtopics.Add(new SubTopicsModel
+                        {
+                            SubtopicID = Convert.ToInt32(reader["SubtopicID"]),
+                            TopicID = Convert.ToInt32(reader["TopicID"]),
+                            SubtopicName = reader["SubtopicName"].ToString(),
+                            IsActive = Convert.ToBoolean(reader["IsActive"])
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in SelectByTopicID(): {ex.Message}");
+            }
+
+            return subtopics;
+        }
+
+
     }
 }

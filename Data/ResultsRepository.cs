@@ -31,9 +31,11 @@ namespace QuizAPI.Data
                     results.Add(new ResultModel
                     {
                         ResultID = Convert.ToInt32(reader["ResultID"]),
-                        QuizID = reader["QuizID"] as int?,
+                        UserID = Convert.ToInt32(reader["UserID"]),
+                        UserName = reader["UserName"].ToString(),
                         Score = Convert.ToDecimal(reader["Score"]),
-                        TimeTaken = Convert.ToDateTime(reader["TimeTaken"])
+                        QuizID = reader["QuizID"] as int?,
+                        QuizName = reader["QuizName"].ToString(),
                     });
                 }
             }
@@ -59,9 +61,10 @@ namespace QuizAPI.Data
                     result = new ResultModel
                     {
                         ResultID = Convert.ToInt32(reader["ResultID"]),
-                        QuizID = reader["QuizID"] as int?,
+                        UserID = Convert.ToInt32(reader["UserID"]),
                         Score = Convert.ToDecimal(reader["Score"]),
-                        TimeTaken = Convert.ToDateTime(reader["TimeTaken"])
+                        QuizID = reader["QuizID"] as int? // Optional
+
                     };
                 }
             }
@@ -78,15 +81,17 @@ namespace QuizAPI.Data
                 {
                     CommandType = CommandType.StoredProcedure
                 };
-                command.Parameters.AddWithValue("@QuizID", result.QuizID ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@Score", result.Score);
-                command.Parameters.AddWithValue("@TimeTaken", result.TimeTaken);
+                command.Parameters.AddWithValue("@UserID", result.UserID);
+
                 connection.Open();
                 int rowsAffected = command.ExecuteNonQuery();
                 return rowsAffected > 0;
             }
         }
         #endregion
+
+
 
         #region Update Results
         public bool UpdateResult(ResultModel result)
@@ -98,9 +103,11 @@ namespace QuizAPI.Data
                     CommandType = CommandType.StoredProcedure
                 };
                 command.Parameters.AddWithValue("@ResultID", result.ResultID);
-                command.Parameters.AddWithValue("@QuizID", result.QuizID ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@Score", result.Score);
-                command.Parameters.AddWithValue("@TimeTaken", result.TimeTaken);
+                command.Parameters.AddWithValue("@UserID", result.UserID);
+                command.Parameters.AddWithValue("@QuizID", result.QuizID); // Optional
+
+
                 connection.Open();
                 int rowsAffected = command.ExecuteNonQuery();
                 return rowsAffected > 0;
@@ -122,6 +129,47 @@ namespace QuizAPI.Data
                 int rowsAffected = command.ExecuteNonQuery();
                 return rowsAffected > 0;
             }
+        }
+        #endregion
+
+        #region Resultcount
+        public int GetTotalResultsCount()
+        {
+            int count = 0;
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand("[dbo].[PR_Results_Count]", connection);
+                connection.Open();
+                count = (int)command.ExecuteScalar();
+            }
+            return count;
+        }
+
+        #endregion
+
+        #region QuizDropDown
+        public IEnumerable<QuizDropDownModel> GetQuiz()
+        {
+            var quiz = new List<QuizDropDownModel>();
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand("[dbo].[PR_Quizzes_DropDown]", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    quiz.Add(new QuizDropDownModel
+                    {
+                        QuizID = Convert.ToInt32(reader["QuizID"]),
+                        QuizName = reader["QuizName"].ToString()
+                    });
+                }
+            }
+            return quiz;
         }
         #endregion
     }

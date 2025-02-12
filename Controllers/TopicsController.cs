@@ -72,5 +72,24 @@ namespace QuizAPI.Controllers
             return BadRequest(new { message = "Failed to delete topic" });
         }
         #endregion
+
+        #region Toggle IsActive Status
+        [HttpPut("{id}/toggle")]
+        public IActionResult ToggleIsActive(int id)
+        {
+            var topic = _repository.SelectByPK(id);
+            if (topic == null)
+                return NotFound();
+
+            bool newStatus = !topic.IsActive; // Toggle the status
+            bool isUpdated = _repository.ToggleIsActive(id, topic.IsActive);
+
+            if (isUpdated)
+                return Ok(new { message = "Topic status updated successfully" });
+            return BadRequest(new { message = "Failed to update topic status" });
+        }
+        #endregion
+
+
     }
 }

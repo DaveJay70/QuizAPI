@@ -121,5 +121,24 @@ namespace QuizAPI.Data
             }
         }
         #endregion
+
+        #region Toggle IsActive Status
+        public bool ToggleIsActive(int topicID, bool currentStatus)
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand("[dbo].[PR_Topics_ToggleIsActive]", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                command.Parameters.AddWithValue("@TopicID", topicID);
+                command.Parameters.AddWithValue("@IsActive", !currentStatus); // Toggle the status
+                connection.Open();
+                int rowsAffected = command.ExecuteNonQuery();
+                return rowsAffected > 0;
+            }
+        }
+        #endregion
+
     }
 }

@@ -6,13 +6,7 @@ namespace QuizAPI.Models
     {
         public QuizQuestionsValidator() 
         {
-           
-            RuleFor(u => u.QuizID)
-               .NotEmpty()
-               .WithMessage("QuizID Compulsory");
-            RuleFor(u => u.QuestionID)
-               .NotEmpty()
-               .WithMessage("QuestionID Compulsory");
+        
         }
     }
 }

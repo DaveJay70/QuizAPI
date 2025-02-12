@@ -25,6 +25,22 @@ namespace QuizAPI.Controllers
         }
         #endregion
 
+        #region GetALL_Count
+        [HttpGet("count")]
+        public IActionResult GetCustomerCount()
+        {
+            try
+            {
+                int totalResults = _repository.SelectAll().Count();
+                return Ok(new { totalResults });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Server error", error = ex.Message });
+            }
+        }
+        #endregion
+
         #region GetByID Results
 
         [HttpGet("{id}")]
@@ -38,14 +54,24 @@ namespace QuizAPI.Controllers
         #endregion
 
         #region Insert Results
-
         [HttpPost]
-        public IActionResult Create([FromBody] ResultModel result)
+        public IActionResult CreateResult([FromBody] ResultModel result)
         {
-            if (_repository.InsertResult(result))
-                return Ok(new { Message = "Result created successfully" });
-            return BadRequest(new { Message = "Failed to create result" });
+            if (result == null)
+            {
+                return BadRequest("Invalid result data.");
+            }
+
+            bool isCreated =_repository.InsertResult(result);
+            if (isCreated)
+            {
+                return Ok("Result created successfully.");
+            }
+
+            return StatusCode(500, "An error occurred while creating the result.");
         }
+
+
         #endregion
 
         #region Update Results
@@ -69,6 +95,19 @@ namespace QuizAPI.Controllers
             if (_repository.DeleteResult(id))
                 return Ok(new { Message = "Result deleted successfully" });
             return BadRequest(new { Message = "Failed to delete result" });
+        }
+        #endregion
+
+        #region GetQuiz
+        [HttpGet("quizzes")]
+        public IActionResult GetQuiz()
+        {
+            var quiz = _repository.GetQuiz();
+            if (!quiz.Any())
+            {
+                return NotFound("No Quiz Found");
+            }
+            return Ok(quiz);
         }
         #endregion
     }

@@ -22,9 +22,7 @@ namespace QuizAPI.Models
             RuleFor(u => u.Mark)
                 .NotEmpty()
                 .WithMessage("Mark Compulsory");
-            RuleFor(u => u.CreatedAt)
-                .NotEmpty()
-                .WithMessage("CreatedAt Compulsory");
+           
         }
     }
 }

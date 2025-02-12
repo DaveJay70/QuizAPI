@@ -25,6 +25,23 @@ namespace QuizAPI.Controllers
         }
         #endregion
 
+        #region GetALL_Count
+        [HttpGet("count")]
+        public IActionResult GetQuizesCount()
+        {
+            try
+            {
+                int totalQuizes = _repository.SelectAll().Count();
+                return Ok(new { totalQuizes });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Server error", error = ex.Message });
+            }
+        }
+
+        #endregion
+
         #region GetByID Quizzes
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
@@ -94,6 +111,45 @@ namespace QuizAPI.Controllers
             if (_repository.DeleteQuiz(id))
                 return Ok(new { Message = "Quiz deleted successfully" });
             return BadRequest(new { Message = "Failed to delete quiz" });
+        }
+        #endregion
+
+        #region GetLevels
+        [HttpGet("levels")]
+        public IActionResult GetLevels()
+        {
+            var levels = _repository.GetLevels();
+            if (!levels.Any())
+            {
+                return NotFound("No Levels Found");
+            }
+            return Ok(levels);
+        }
+        #endregion
+
+        #region GetUsers
+        [HttpGet("users")]
+        public IActionResult GetUsers()
+        {
+            var users = _repository.GetUsers();
+            if (!users.Any())
+            {
+                return NotFound("No Users Found");
+            }
+            return Ok(users);
+        }
+        #endregion
+
+        #region GetSubtopics
+        [HttpGet("subtopic")]
+        public IActionResult GetSubtopics()
+        {
+            var subtopic = _repository.GetSubtopics();
+            if (!subtopic.Any())
+            {
+                return NotFound("No Subtopic Found");
+            }
+            return Ok(subtopic);
         }
         #endregion
     }

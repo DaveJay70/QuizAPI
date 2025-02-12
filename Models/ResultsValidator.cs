@@ -7,13 +7,7 @@ namespace QuizAPI.Models
         public ResultsValidator()
         {
             
-            RuleFor(u => u.Score)
-               .NotEmpty()
-               .WithMessage("Score Compulsory");
-            RuleFor(u => u.TimeTaken)
-               .NotEmpty()
-               .WithMessage("TimeTaken Compulsory");
-           
+         
         }
     }
 }

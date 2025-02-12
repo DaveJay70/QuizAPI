@@ -1,6 +1,10 @@
 ﻿using QuizAPI.Data;
 using QuizAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace QuizAPI.Controllers
 {
@@ -10,80 +14,148 @@ namespace QuizAPI.Controllers
     {
         #region Connection
         private readonly QuestionsRepository _questionsRepository;
+
         public QuestionsController(QuestionsRepository questionsRepository)
         {
             _questionsRepository = questionsRepository;
         }
         #endregion
 
-        #region GetALL Questions
+        #region Get All Questions
         [HttpGet]
-        public IActionResult SelectAllQuestions()
+        public IActionResult GetAllQuestions()
         {
             var questions = _questionsRepository.SelectAll();
             return Ok(questions);
         }
         #endregion
 
-        #region GetByID Questions
+        #region Get Question by ID
         [HttpGet("{id}")]
         public IActionResult GetQuestionById(int id)
         {
             var question = _questionsRepository.SelectByPK(id);
             if (question == null)
             {
-                return NotFound();
+                return NotFound(new { Message = "Question not found" });
             }
             return Ok(question);
         }
         #endregion
 
-        #region Insert Questions
+        #region Insert Question
         [HttpPost]
         public IActionResult InsertQuestion([FromBody] QuestionsModel question)
         {
             if (question == null)
             {
-                return BadRequest();
+                return BadRequest(new { Error = "Invalid question data" });
             }
+
             bool isInserted = _questionsRepository.InsertQuestion(question);
             if (isInserted)
             {
-                return Ok(new { Message = "Question Inserted" });
+                return Ok(new { Message = "Question inserted successfully" });
             }
-            return StatusCode(500, "An error occurred while inserting the question");
+
+            return StatusCode(500, new { Error = "An error occurred while inserting the question" });
         }
         #endregion
 
-        #region Update Questions
+        #region Update Question
         [HttpPut("{id}")]
         public IActionResult UpdateQuestion(int id, [FromBody] QuestionsModel question)
         {
             if (question == null || id != question.QuestionID)
             {
-                return BadRequest();
+                return BadRequest(new { Error = "Invalid request data" });
             }
+
             var isUpdated = _questionsRepository.UpdateQuestion(question);
             if (!isUpdated)
             {
-                return NotFound();
+                return NotFound(new { Message = "Question not found" });
             }
+
             return NoContent();
         }
         #endregion
 
-        #region Delete Questions
-
+        #region Delete Question
         [HttpDelete("{id}")]
-        public IActionResult DeleteQuestion(int id)
+        public ActionResult DeleteQuestion(int id)
         {
-            var isDeleted = _questionsRepository.Delete(id);
-            if (!isDeleted)
+            try
             {
-                return NotFound();
+                if (_questionsRepository.Delete(id))
+                {
+                    return NoContent();
+                }
+
+                return NotFound(new { Message = "Question not found" });
             }
-            return NoContent();
+            catch (SqlException ex) when (ex.Number == 547) // Foreign key violation
+            {
+                return Conflict(new { Error = "Cannot delete question as it is referenced in quizzes.", Details = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = "An error occurred while deleting the question.", Details = ex.Message });
+            }
         }
         #endregion
+
+        #region Get Levels
+        [HttpGet("levels")]
+        public IActionResult GetLevels()
+        {
+            var levels = _questionsRepository.GetLevels();
+            if (!levels.Any())
+            {
+                return NotFound(new { Message = "No levels found" });
+            }
+            return Ok(levels);
+        }
+        #endregion
+
+        #region Get Subtopics
+        [HttpGet("subtopics")]
+        public IActionResult GetSubtopics()
+        {
+            var subtopics = _questionsRepository.GetSubtopics();
+            if (!subtopics.Any())
+            {
+                return NotFound(new { Message = "No subtopics found" });
+            }
+            return Ok(subtopics);
+        }
+        #endregion
+
+        #region GET By SubTopics
+
+        [HttpGet("GetBySubtopics")]
+        public IActionResult GetQuestionsByMultipleSubtopics([FromQuery] string subtopicIDs)
+        {
+            var questions = _questionsRepository.GetQuestionsByMultipleSubtopics(subtopicIDs);
+            return Ok(questions);
+        }
+        #endregion
+
+        #region GetALL_Count
+        [HttpGet("count")]
+        public IActionResult GetCustomerCount()
+        {
+            try
+            {
+                int totalQuestions = _questionsRepository.SelectAll().Count();
+                return Ok(new { totalQuestions });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Server error", error = ex.Message });
+            }
+        }
+        #endregion
+
     }
 }
