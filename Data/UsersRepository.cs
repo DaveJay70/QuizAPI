@@ -176,40 +176,6 @@ namespace QuizAPI.Data
         }
         #endregion
 
-        #region Usercount
-        public int GetTotalUsersCount()
-        {
-            int count = 0;
-            using (SqlConnection connection = new SqlConnection(_connectionString))
-            {
-                SqlCommand command = new SqlCommand("[dbo].[PR_Users_Count]", connection);
-                connection.Open();
-                count = (int)command.ExecuteScalar();
-            }
-            return count;
-        }
-
-        #endregion
-
-        #region RegisterUser
-        public bool RegisterUser(UsersModel user)
-        {
-            using (SqlConnection connection = new SqlConnection(_connectionString))
-            {
-                SqlCommand command = new SqlCommand("[dbo].[PR_Users_Register]", connection)
-                {
-                    CommandType = CommandType.StoredProcedure
-                };
-                command.Parameters.AddWithValue("@Username", user.Username);
-                command.Parameters.AddWithValue("@Email", user.Email);
-                command.Parameters.AddWithValue("@Password", user.Password);
-                connection.Open();
-                int rowsAffected = command.ExecuteNonQuery();
-                return rowsAffected > 0;
-            }
-        }
-        #endregion
-
         #region Login
         public UsersModel Login(string email, string password)
         {

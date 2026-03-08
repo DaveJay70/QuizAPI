@@ -94,13 +94,9 @@ namespace QuizAPI.Controllers
 
                 return NotFound(new { Message = "Question not found" });
             }
-            catch (SqlException ex) when (ex.Number == 547) // Foreign key violation
+            catch (SqlException ex) when (ex.Number == 547)
             {
-                return Conflict(new { Error = "Cannot delete question as it is referenced in quizzes.", Details = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Error = "An error occurred while deleting the question.", Details = ex.Message });
+                return Conflict(new { Error = "Cannot delete question as it is referenced in quizzes." });
             }
         }
         #endregion
@@ -129,20 +125,6 @@ namespace QuizAPI.Controllers
             }
             return Ok(subtopics);
         }
-        #endregion
-
-        #region GET By SubTopics
-
-        [HttpDelete("{id}")]
-        public IActionResult DeleteQuestion(int id)
-        {
-            var isDeleted = _questionsRepository.Delete(id);
-            if (!isDeleted)
-            {
-                return NotFound();
-            }
-        }
-
         #endregion
 
     }
