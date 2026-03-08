@@ -154,7 +154,6 @@ namespace QuizAPI.Data
             }
             return count;
         }
-
         #endregion
 
         #region RegisterUser
@@ -175,6 +174,7 @@ namespace QuizAPI.Data
             }
         }
         #endregion
+
 
         #region Login
         public UsersModel Login(string email, string password)

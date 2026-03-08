@@ -51,12 +51,11 @@ namespace QuizAPI.Controllers
         #endregion
 
         #region GetALL_Count
-        [HttpGet("count")]
+        [HttpGet("total")]
         public IActionResult GetAllCount()
         {
             int users = _repository.GetTotalUsersCount();
             return Ok(new { Users_Count = users });
-
         }
         #endregion
 

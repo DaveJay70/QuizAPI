@@ -31,10 +31,11 @@ namespace QuizAPI.Data
                     results.Add(new ResultModel
                     {
                         ResultID = Convert.ToInt32(reader["ResultID"]),
-                        QuizID = Convert.ToInt32(reader["QuizID"]),
-                        QuizName = reader["QuizName"].ToString(),
                         Score = Convert.ToDecimal(reader["Score"]),
-                        TimeTaken = Convert.ToDateTime(reader["TimeTaken"])
+                        UserID = Convert.ToInt32(reader["UserID"]),
+                        UserName = reader["UserName"].ToString(),
+                        QuizID = Convert.ToInt32(reader["QuizID"]),
+                        QuizName = reader["QuizName"].ToString()
                     });
                 }
             }
@@ -62,7 +63,6 @@ namespace QuizAPI.Data
                         ResultID = Convert.ToInt32(reader["ResultID"]),
                         UserID = Convert.ToInt32(reader["UserID"]),
                         Score = Convert.ToDecimal(reader["Score"]),
-                        TimeTaken = Convert.ToDateTime(reader["TimeTaken"])
                     };
                 }
             }
@@ -79,10 +79,14 @@ namespace QuizAPI.Data
                 {
                     CommandType = CommandType.StoredProcedure
                 };
+
                 command.Parameters.AddWithValue("@Score", result.Score);
-                command.Parameters.AddWithValue("@TimeTaken", result.TimeTaken);
+                command.Parameters.AddWithValue("@UserID", result.UserID);
+
                 connection.Open();
+
                 int rowsAffected = command.ExecuteNonQuery();
+
                 return rowsAffected > 0;
             }
         }
@@ -99,11 +103,16 @@ namespace QuizAPI.Data
                 {
                     CommandType = CommandType.StoredProcedure
                 };
+
                 command.Parameters.AddWithValue("@ResultID", result.ResultID);
                 command.Parameters.AddWithValue("@Score", result.Score);
-                command.Parameters.AddWithValue("@TimeTaken", result.TimeTaken);
+                command.Parameters.AddWithValue("@UserID", result.UserID);
+                command.Parameters.AddWithValue("@QuizID", result.QuizID);
+
                 connection.Open();
+
                 int rowsAffected = command.ExecuteNonQuery();
+
                 return rowsAffected > 0;
             }
         }

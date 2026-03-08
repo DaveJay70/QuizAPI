@@ -169,5 +169,25 @@ namespace QuizAPI.Data
             return subtopic;
         }
         #endregion
+
+        public bool ToggleIsActive(int subtopicID, bool isActive)
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand("PR_Subtopics_ToggleIsActive", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                command.Parameters.AddWithValue("@SubtopicID", subtopicID);
+                command.Parameters.AddWithValue("@IsActive", isActive);
+
+                connection.Open();
+
+                int rowsAffected = command.ExecuteNonQuery();
+
+                return rowsAffected > 0;
+            }
+        }
     }
 }
