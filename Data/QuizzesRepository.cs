@@ -139,6 +139,30 @@ namespace QuizAPI.Data
         }
         #endregion
 
+        #region QuizCount
+        public int GetTotalQuizzesCount()
+        {
+            int count = 0;
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    SqlCommand command = new SqlCommand("[dbo].[PR_Quizzes_Count]", connection)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
+                    connection.Open();
+                    count = (int)command.ExecuteScalar();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching total quizzes: {ex.Message}");
+            }
+            return count;
+        }
+
+        #endregion
 
         #region GetLevel
         public IEnumerable<LevelsModel> GetLevels()

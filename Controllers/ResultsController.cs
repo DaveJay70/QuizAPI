@@ -27,17 +27,11 @@ namespace QuizAPI.Controllers
 
         #region GetALL_Count
         [HttpGet("count")]
-        public IActionResult GetCustomerCount()
+        public IActionResult GetAllCount()
         {
-            try
-            {
-                int totalResults = _repository.SelectAll().Count();
-                return Ok(new { totalResults });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Server error", error = ex.Message });
-            }
+            int result = _repository.GetTotalResultsCount();
+            return Ok(new { Result_Count = result });
+
         }
         #endregion
 

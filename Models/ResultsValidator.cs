@@ -7,7 +7,11 @@ namespace QuizAPI.Models
         public ResultsValidator()
         {
             
+            RuleFor(u => u.Score)
+               .NotEmpty()
+               .WithMessage("Score Compulsory");
          
+           
         }
     }
 }

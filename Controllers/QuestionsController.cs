@@ -133,28 +133,16 @@ namespace QuizAPI.Controllers
 
         #region GET By SubTopics
 
-        [HttpGet("GetBySubtopics")]
-        public IActionResult GetQuestionsByMultipleSubtopics([FromQuery] string subtopicIDs)
+        [HttpDelete("{id}")]
+        public IActionResult DeleteQuestion(int id)
         {
-            var questions = _questionsRepository.GetQuestionsByMultipleSubtopics(subtopicIDs);
-            return Ok(questions);
+            var isDeleted = _questionsRepository.Delete(id);
+            if (!isDeleted)
+            {
+                return NotFound();
+            }
         }
-        #endregion
 
-        #region GetALL_Count
-        [HttpGet("count")]
-        public IActionResult GetCustomerCount()
-        {
-            try
-            {
-                int totalQuestions = _questionsRepository.SelectAll().Count();
-                return Ok(new { totalQuestions });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Server error", error = ex.Message });
-            }
-        }
         #endregion
 
     }

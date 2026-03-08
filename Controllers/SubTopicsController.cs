@@ -101,21 +101,5 @@ namespace QuizAPI.Controllers
 
             return BadRequest(new { Message = "Failed to update subtopic status" });
         }
-
-        [HttpGet("ByTopic/{topicID}")]
-        public IActionResult GetSubtopicsByTopicID(int topicID)
-        {
-            var subtopics = _repository.SelectByTopicID(topicID);
-
-            // 🛠 Debugging - Check if the list is empty
-            if (subtopics == null || !subtopics.Any())
-            {
-                return Ok(new { Message = "No subtopics found for this topic.", Data = new List<SubTopicsModel>() });
-            }
-
-            return Ok(subtopics);
-        }
-
-
     }
 }

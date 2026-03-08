@@ -269,46 +269,5 @@ namespace QuizAPI.Data
             return count;
         }
         #endregion
-
-        public IEnumerable<QuestionsModel> GetQuestionsByMultipleSubtopics(string subtopicIDs)
-        {
-            List<QuestionsModel> questions = new List<QuestionsModel>();
-
-            using (SqlConnection connection = new SqlConnection(_connectionString))
-            {
-                SqlCommand command = new SqlCommand("GetQuestionsByMultipleSubtopics", connection);
-                command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddWithValue("@SubtopicIDs", string.IsNullOrEmpty(subtopicIDs) ? DBNull.Value : (object)subtopicIDs);
-
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    questions.Add(new QuestionsModel
-                    {
-                        QuestionID = Convert.ToInt32(reader["QuestionID"]),
-                        SubtopicID = Convert.ToInt32(reader["SubtopicID"]),
-                        LevelID = Convert.ToInt32(reader["LevelID"]),
-                        QuestionText = reader["QuestionText"].ToString(),
-                        QuestionType = reader["QuestionType"].ToString(),
-                        Options1 = reader["Options1"].ToString(),
-                        Options2 = reader["Options2"].ToString(),
-                        Options3 = reader["Options3"].ToString(),
-                        Options4 = reader["Options4"].ToString(),
-                        Options5 = reader["Options5"].ToString(),
-                        CorrectOption = Convert.ToInt32(reader["CorrectOption"]),
-                        CorrectAnswer = reader["CorrectAnswer"].ToString()
-                   
-                    });
-                }
-                connection.Close();
-            }
-            return questions;
-        }
-
-
-
-
     }
 }
