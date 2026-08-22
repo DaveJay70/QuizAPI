@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using QuizAPI.Data;
 using QuizAPI.Models;
 
@@ -30,7 +30,7 @@ namespace QuizAPI.Controllers
         public IActionResult GetAllCount()
         {
             int result = _repository.GetTotalResultsCount();
-            return Ok(new { Result_Count = result });
+            return Ok(new { totalResults = result });
 
         }
         #endregion

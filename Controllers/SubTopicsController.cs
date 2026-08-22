@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using QuizAPI.Data;
 using QuizAPI.Models;
 
@@ -72,6 +72,19 @@ namespace QuizAPI.Controllers
             if (_repository.DeleteSubtopic(id))
                 return Ok(new { Message = "Subtopic deleted successfully" });
             return BadRequest(new { Message = "Failed to delete subtopic" });
+        }
+        #endregion
+
+        #region GetSubtopicsByTopicId
+        [HttpGet("ByTopic/{topicId}")]
+        public IActionResult GetByTopicId(int topicId)
+        {
+            var subtopics = _repository.SelectByTopicId(topicId);
+            if (!subtopics.Any())
+            {
+                return Ok(new List<SubTopicsModel>());
+            }
+            return Ok(subtopics);
         }
         #endregion
 

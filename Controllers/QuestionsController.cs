@@ -1,4 +1,4 @@
-﻿using QuizAPI.Data;
+using QuizAPI.Data;
 using QuizAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -27,6 +27,22 @@ namespace QuizAPI.Controllers
         {
             var questions = _questionsRepository.SelectAll();
             return Ok(questions);
+        }
+        #endregion
+
+        #region Get Questions Count
+        [HttpGet("count")]
+        public IActionResult GetQuestionsCount()
+        {
+            try
+            {
+                int totalQuestions = _questionsRepository.GetTotalQuestionsCount();
+                return Ok(new { totalQuestions });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Server error", error = ex.Message });
+            }
         }
         #endregion
 

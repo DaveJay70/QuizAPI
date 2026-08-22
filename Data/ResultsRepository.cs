@@ -1,4 +1,4 @@
-﻿using QuizAPI.Models;
+using QuizAPI.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -82,6 +82,7 @@ namespace QuizAPI.Data
 
                 command.Parameters.AddWithValue("@Score", result.Score);
                 command.Parameters.AddWithValue("@UserID", result.UserID);
+                command.Parameters.AddWithValue("@QuizID", result.QuizID > 0 ? result.QuizID : 1);
 
                 connection.Open();
 

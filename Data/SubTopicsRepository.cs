@@ -1,4 +1,4 @@
-﻿using QuizAPI.Models;
+using QuizAPI.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -167,6 +167,14 @@ namespace QuizAPI.Data
                 }
             }
             return subtopic;
+        }
+        #endregion
+
+        #region GetByTopicId
+        public IEnumerable<SubTopicsModel> SelectByTopicId(int topicId)
+        {
+            var allSubtopics = SelectAll();
+            return allSubtopics.Where(s => s.TopicID == topicId && s.IsActive);
         }
         #endregion
 

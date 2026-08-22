@@ -105,5 +105,51 @@ namespace QuizAPI.Controllers
             return BadRequest(new { message = "Failed to delete user" });
         }
         #endregion
+
+
+        #region Register
+
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] UsersModel user)
+        {
+            if (user == null)
+            {
+                return BadRequest(new { message = "Invalid user data" });
+            }
+
+            bool isRegistered = _repository.RegisterUser(user);
+
+            if (!isRegistered)
+            {
+                return BadRequest(new { message = "Registration failed" });
+            }
+
+            return Ok(new { message = "User registered successfully" });
+        }
+
+        #endregion
+
+        #region Login
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] LoginModel login)
+        {
+            var user = _repository.Login(login.Email, login.Password);
+
+            if (user == null)
+            {
+                return Unauthorized(new { message = "Invalid email or password" });
+            }
+
+            var token = _repository.AuthenticateUser(login.Email, login.Password);
+
+            return Ok(new
+            {
+                message = "Login successful",
+                token = token,
+                user = user
+            });
+        }
+        #endregion
     }
 }
+
